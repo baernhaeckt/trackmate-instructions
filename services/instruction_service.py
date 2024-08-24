@@ -2,7 +2,7 @@ import config
 
 from typing import AsyncIterable
 
-from openai import OpenAI
+from openai import OpenAI, ChatCompletion, Stream
 
 from models.input_model import InputModel
 
@@ -13,7 +13,7 @@ class InstructionService:
             api_key=config.settings.OPENAI_API_KEY
         )
 
-    def _generate_text(self, start: InputModel, end: InputModel) -> str:
+    def _execute_chat_completion(self, start: InputModel, end: InputModel, stream: bool) -> ChatCompletion:
         prompt = (f"this ist the startpoint\n latitude: {start.latitude}, longitude: {start.longitude}, altitude: {start.altitude}\n\n"
                   f"this is the endpoint\n latitude: {end.latitude}, longitude: {end.longitude}, altitude: {end.altitude}")
         response = self.client.chat.completions.create(
@@ -45,17 +45,25 @@ class InstructionService:
             presence_penalty=0,
             response_format={
                 "type": "text"
-            }
+            },
+            stream=stream
         )
 
-        return response.choices[0].message.content
+        return response
 
-    def generate(self, start: InputModel, end: InputModel) -> AsyncIterable[bytes]:
-        text = self._generate_text(start, end)
+    def generate_text(self, start: InputModel, end: InputModel) -> AsyncIterable[str]:
+        openai_response = self._execute_chat_completion(start, end, True)
+        for chunk in openai_response:
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
+
+    def generate_audio(self, start: InputModel, end: InputModel) -> AsyncIterable[bytes]:
+        openai_response = self._execute_chat_completion(start, end, False)
+
         with self.client.audio.speech.with_streaming_response.create(
             model="tts-1",
             voice="nova",
-            input=text,
+            input=openai_response.choices[0].message.content,
         ) as response:
             if response.status_code == 200:
                 for chunk in response.iter_bytes(chunk_size=2048):
