@@ -11,7 +11,7 @@ router = APIRouter()
 async def generate_audio_instructions(start: InputModel, end: InputModel):
     instructions_service = InstructionService()
 
-    return StreamingResponse(instructions_service.generate_audio(start, end), media_type="audio/mp3")
+    return StreamingResponse(instructions_service.generate_audio(start, end), media_type="audio/wav")
 
 
 @router.post("/generate_text", tags=["instructions"], status_code=200)
