@@ -66,6 +66,7 @@ class InstructionService:
         with self.client.audio.speech.with_streaming_response.create(
             model="tts-1",
             voice="nova",
+            response_format="wav",
             input=openai_response.choices[0].message.content,
         ) as response:
             if response.status_code == 200:
