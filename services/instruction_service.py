@@ -1,9 +1,8 @@
-import config
-
 from typing import AsyncIterable
 
-from openai import OpenAI, ChatCompletion, Stream
+from openai import OpenAI, ChatCompletion
 
+import config
 from models.input_model import InputModel
 
 
@@ -24,7 +23,11 @@ class InstructionService:
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are an expert assistant for blind people who can use lat and long coordinates to instruct a blind person in which direction to walk. Use right, left and straight instead of the cardinal points. Indicate how many meters and steps there are. The instructions must be helpful and detailed for blind people, don't use any lat and long values in the output. Always answer in German."
+                            "text": "You are an expert assistant for blind people who can use lat and long coordinates to"
+                                    "instruct a blind person in which direction to walk. Use right, left and straight instead"
+                                    "of the cardinal points. Indicate how many meters and steps there are. The instructions"
+                                    "must be helpful and detailed for blind people, don't use any lat and long values in the output."
+                                    "Always answer in German."
                         }
                     ]
                 },
